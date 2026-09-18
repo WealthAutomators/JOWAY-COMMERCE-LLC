@@ -3,7 +3,7 @@
 import { memo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Eye, Heart, ShoppingBag, Check } from "lucide-react";
+import { Heart, ShoppingBag, Check } from "lucide-react";
 import { motion } from "framer-motion";
 import { Product } from "@/types";
 import { formatPrice, calculateDiscount } from "@/lib/format";
@@ -11,7 +11,6 @@ import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { StarRating } from "@/components/ui/star-rating";
 import { QuickViewModal } from "@/components/product/quick-view-modal";
 import { cn } from "@/lib/utils";
 
@@ -42,22 +41,21 @@ export const ProductCard = memo(function ProductCard({ product, className }: Pro
         className={cn("group relative flex flex-col", className)}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-        initial={{ opacity: 0, y: 12 }}
+        initial={{ opacity: 0, y: 16 }}
         whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.4 }}
-        whileHover={{ y: -4 }}
+        viewport={{ once: true, margin: "-40px" }}
+        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
       >
-        <div className="relative aspect-[4/5] overflow-hidden rounded-xl border border-border bg-muted shadow-sm transition-shadow duration-300 group-hover:shadow-lg">
-          <Link href={`/product/${product.slug}`} className="block h-full w-full">
+        <div className="relative aspect-[4/5] overflow-hidden bg-sand">
+          <Link href={`/product/${product.slug}`} className="relative block h-full w-full">
             <Image
               src={product.images[0]}
               alt={product.name}
               fill
               loading="lazy"
               className={cn(
-                "object-cover transition-all duration-500",
-                isHovered && product.images[1] ? "opacity-0 scale-105" : "opacity-100"
+                "object-cover transition-all duration-700 ease-out",
+                isHovered && product.images[1] ? "opacity-0 scale-[1.03]" : "opacity-100"
               )}
               sizes="(max-width: 768px) 50vw, 25vw"
             />
@@ -68,8 +66,8 @@ export const ProductCard = memo(function ProductCard({ product, className }: Pro
                 fill
                 loading="lazy"
                 className={cn(
-                  "object-cover transition-all duration-500",
-                  isHovered ? "opacity-100 scale-105" : "opacity-0"
+                  "object-cover transition-all duration-700 ease-out",
+                  isHovered ? "opacity-100 scale-[1.03]" : "opacity-0"
                 )}
                 sizes="(max-width: 768px) 50vw, 25vw"
               />
@@ -78,73 +76,71 @@ export const ProductCard = memo(function ProductCard({ product, className }: Pro
 
           {hasDiscount && (
             <Badge variant="sale" className="absolute left-3 top-3">
-              -{discountPercent}%
+              −{discountPercent}%
             </Badge>
           )}
           {product.badge && !hasDiscount && (
-            <Badge variant="sale" className="absolute left-3 top-3">
+            <Badge variant="outline" className="absolute left-3 top-3 bg-ivory/90">
               {product.badge}
             </Badge>
           )}
+          {product.newArrival && !product.badge && !hasDiscount && (
+            <Badge variant="outline" className="absolute left-3 top-3 bg-ivory/90">
+              New
+            </Badge>
+          )}
 
-          <div className="absolute right-3 top-3 flex flex-col gap-2 opacity-0 transition-all duration-300 group-hover:opacity-100">
-            <Button
-              variant="secondary"
-              size="icon"
-              className="h-9 w-9 rounded-full shadow-sm transition-transform hover:scale-110"
-              onClick={() => toggleWishlist(product.id)}
-              aria-label={inWishlist ? "Remove from wishlist" : "Add to wishlist"}
-            >
-              <Heart className={cn("h-4 w-4 transition-colors", inWishlist && "fill-accent text-accent")} />
-            </Button>
-            <Button
-              variant="secondary"
-              size="icon"
-              className="h-9 w-9 rounded-full shadow-sm transition-transform hover:scale-110"
-              onClick={() => setQuickViewOpen(true)}
-              aria-label="Quick view"
-            >
-              <Eye className="h-4 w-4" />
-            </Button>
-          </div>
+          <button
+            type="button"
+            className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-ivory/90 text-foreground transition-colors hover:text-primary"
+            onClick={() => toggleWishlist(product.id)}
+            aria-label={inWishlist ? "Remove from wishlist" : "Add to wishlist"}
+          >
+            <Heart className={cn("h-4 w-4", inWishlist && "fill-primary text-primary")} />
+          </button>
 
-          <div className="absolute bottom-0 left-0 right-0 translate-y-full p-3 transition-transform duration-300 group-hover:translate-y-0 max-sm:translate-y-0">
-            <Button
-              className="w-full transition-all max-sm:opacity-100"
-              size="sm"
-              onClick={handleAddToCart}
-            >
-              {added ? (
-                <>
-                  <Check className="h-4 w-4" />
-                  Added!
-                </>
-              ) : (
-                <>
-                  <ShoppingBag className="h-4 w-4" />
-                  Add to Cart
-                </>
-              )}
-            </Button>
+          <div className="absolute inset-x-3 bottom-3 translate-y-2 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100 max-sm:translate-y-0 max-sm:opacity-100">
+            <div className="flex gap-2">
+              <Button className="flex-1" size="sm" onClick={handleAddToCart}>
+                {added ? (
+                  <>
+                    <Check className="h-3.5 w-3.5" />
+                    Added
+                  </>
+                ) : (
+                  <>
+                    <ShoppingBag className="h-3.5 w-3.5" />
+                    Add
+                  </>
+                )}
+              </Button>
+              <Button
+                variant="secondary"
+                size="sm"
+                className="hidden sm:inline-flex"
+                onClick={() => setQuickViewOpen(true)}
+              >
+                View
+              </Button>
+            </div>
           </div>
         </div>
 
-        <div className="mt-4 flex flex-1 flex-col gap-1.5">
+        <div className="mt-4 flex flex-1 flex-col gap-1">
+          <p className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">{product.category}</p>
           <Link href={`/product/${product.slug}`}>
-            <h3 className="text-sm font-medium leading-snug text-foreground transition-colors hover:text-primary line-clamp-2">
+            <h3 className="font-serif text-[1.05rem] leading-snug text-foreground transition-colors hover:text-primary">
               {product.name}
             </h3>
           </Link>
-          <p className="text-xs text-muted-foreground">{product.category}</p>
-          <StarRating rating={product.rating} reviews={product.reviews} />
-          <div className="mt-auto flex items-center gap-2">
+          <div className="mt-2 flex items-center gap-2">
             {hasDiscount ? (
               <>
-                <span className="text-sm font-semibold text-accent">{formatPrice(product.salePrice!)}</span>
+                <span className="text-sm font-medium">{formatPrice(product.salePrice!)}</span>
                 <span className="text-sm text-muted-foreground line-through">{formatPrice(product.price)}</span>
               </>
             ) : (
-              <span className="text-sm font-semibold text-foreground">{formatPrice(product.price)}</span>
+              <span className="text-sm font-medium">{formatPrice(product.price)}</span>
             )}
           </div>
         </div>

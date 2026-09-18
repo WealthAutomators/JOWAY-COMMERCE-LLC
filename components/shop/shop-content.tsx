@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { products as allProducts } from "@/data/products";
-import { sortOptions } from "@/data/homepage";
+import { jowayEditSlugs, sortOptions } from "@/data/homepage";
 import { Product } from "@/types";
 import { getEffectivePrice } from "@/data/products";
 import { Container } from "@/components/ui/container";
@@ -36,12 +36,13 @@ export function ShopContent() {
   const initialSearch = searchParams.get("search") || "";
   const initialCategory = searchParams.get("category") || "";
   const initialSale = searchParams.get("sale") === "true";
+  const collection = searchParams.get("collection");
 
   const [search, setSearch] = useState(initialSearch);
   const [selectedCategories, setSelectedCategories] = useState<string[]>(
     initialCategory ? [initialCategory] : []
   );
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 150]);
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 400]);
   const [inStockOnly, setInStockOnly] = useState(false);
   const [saleOnly, setSaleOnly] = useState(initialSale);
   const [sort, setSort] = useState("featured");
@@ -78,8 +79,13 @@ export function ShopContent() {
       result = result.filter((p) => p.salePrice);
     }
 
+    if (collection === "joway-edit") {
+      const edit = new Set<string>(jowayEditSlugs);
+      result = result.filter((p) => edit.has(p.slug));
+    }
+
     return sortProducts(result, sort);
-  }, [search, selectedCategories, priceRange, inStockOnly, saleOnly, sort]);
+  }, [search, selectedCategories, priceRange, inStockOnly, saleOnly, sort, collection]);
 
   const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
   const paginatedProducts = filteredProducts.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
@@ -110,8 +116,14 @@ export function ShopContent() {
   return (
     <Container className="py-8 md:py-12">
       <div className="mb-8">
-        <h1 className="text-3xl font-semibold tracking-tight">Shop</h1>
-        <p className="mt-2 text-muted-foreground">{filteredProducts.length} products</p>
+        <h1 className="font-serif text-4xl tracking-tight">
+          {collection === "joway-edit" ? "The JOWAY Edit" : "Shop"}
+        </h1>
+        <p className="mt-2 text-muted-foreground">
+          {collection === "joway-edit"
+            ? "A curated cross-category selection."
+            : `${filteredProducts.length} products`}
+        </p>
       </div>
 
       <div className="flex gap-8">
@@ -120,11 +132,11 @@ export function ShopContent() {
         </aside>
 
         <div className="flex-1 min-w-0">
-          <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+          <div className="mb-8 flex items-center justify-end">
             <Button
               variant="secondary"
               size="sm"
-              className="lg:hidden"
+              className="mr-auto lg:hidden"
               onClick={() => setSidebarOpen(!sidebarOpen)}
             >
               <SlidersHorizontal className="h-4 w-4" />
@@ -166,7 +178,7 @@ export function ShopContent() {
                 onClick={() => {
                   setSearch("");
                   setSelectedCategories([]);
-                  setPriceRange([0, 150]);
+                  setPriceRange([0, 400]);
                   setInStockOnly(false);
                   setSaleOnly(false);
                   setPage(1);

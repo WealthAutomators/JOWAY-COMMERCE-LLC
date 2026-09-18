@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { getProductBySlug } from "@/data/products";
 import { ProductDetail } from "@/components/product/product-detail";
+import { company } from "@/data/company";
 
 interface ProductPageProps {
   params: Promise<{ slug: string }>;
@@ -18,6 +19,12 @@ export async function generateMetadata({ params }: ProductPageProps) {
   return {
     title: product.name,
     description: product.description,
+    openGraph: {
+      title: `${product.name} | ${company.name}`,
+      description: product.description,
+      images: product.images.map((url) => ({ url, alt: product.name })),
+      type: "website",
+    },
   };
 }
 
@@ -25,5 +32,32 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const { slug } = await params;
   const product = getProductBySlug(slug);
   if (!product) notFound();
-  return <ProductDetail product={product} />;
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    description: product.description,
+    image: product.images,
+    sku: product.sku,
+    brand: { "@type": "Brand", name: company.name },
+    offers: {
+      "@type": "Offer",
+      priceCurrency: "USD",
+      price: product.salePrice ?? product.price,
+      availability: product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+    },
+    aggregateRating: {
+      "@type": "AggregateRating",
+      ratingValue: product.rating,
+      reviewCount: product.reviews,
+    },
+  };
+
+  return (
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <ProductDetail product={product} />
+    </>
+  );
 }

@@ -1,22 +1,29 @@
 export const company = {
-  name: "AAM Partners LLC",
-  tagline: "Everything You Need. Delivered with Confidence.",
+  name: "JOWAY COMMERCE LLC",
+  shortName: "JOWAY",
+  tagline: "Contemporary coastal living, well designed.",
   description:
-    "AAM Partners LLC brings together quality products across multiple categories, helping families find everything they need in one trusted online marketplace.",
-  email: "aampartnersllc1@gmail.com",
+    "JOWAY COMMERCE LLC is a contemporary lifestyle retailer offering thoughtfully chosen pieces for home, travel, and everyday living — designed for bright rooms, easy weekends, and a slower, sunlit pace.",
+  email: "jowaycommercellc@gmail.com",
   address: {
-    street: "717 S Military Hwy",
-    city: "Virginia Beach",
-    state: "VA",
-    zip: "23464",
+    street: "4000 OCEAN BEACH BLVD",
+    street2: "APT 3B",
+    city: "COCOA BEACH",
+    state: "FL",
+    zip: "32931",
     country: "United States",
   },
-  social: {
-    instagram: "https://instagram.com/aampartnersllc",
-    facebook: "https://facebook.com/aampartnersllc",
-    twitter: "https://twitter.com/aampartnersllc",
-    pinterest: "https://pinterest.com/aampartnersllc",
-  },
-  hours: "Mon–Fri: 9am–6pm EST",
-  copyright: `© ${new Date().getFullYear()} AAM Partners LLC. All rights reserved.`,
+  copyright: `© ${new Date().getFullYear()} JOWAY COMMERCE LLC. All rights reserved.`,
 };
+
+export function formatAddressLines(): string[] {
+  return [
+    company.address.street,
+    company.address.street2,
+    `${company.address.city}, ${company.address.state} ${company.address.zip}`,
+  ];
+}
+
+export function formatAddressInline(): string {
+  return formatAddressLines().join(", ");
+}

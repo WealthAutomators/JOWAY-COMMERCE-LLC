@@ -10,7 +10,11 @@ import { Container } from "@/components/ui/container";
 import { Input } from "@/components/ui/input";
 import { formatPrice } from "@/lib/format";
 
-export function SearchBar() {
+interface SearchBarProps {
+  onNavigate?: () => void;
+}
+
+export function SearchBar({ onNavigate }: SearchBarProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
@@ -34,80 +38,82 @@ export function SearchBar() {
       router.push(`/shop?search=${encodeURIComponent(searchQuery.trim())}`);
       setSearchOpen(false);
       setSearchQuery("");
+      onNavigate?.();
     }
   };
 
   return (
-    <div className="border-b border-border bg-gradient-to-r from-primary/[0.06] via-background to-accent/[0.06]">
-      <Container className="py-2">
-        <div ref={searchRef} className="relative">
-          <form onSubmit={handleSearchSubmit}>
-            <div className="relative">
-              <button
-                type="submit"
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-primary/70 transition-colors hover:text-primary"
-                aria-label="Search products"
-              >
-                <Search className="h-4 w-4" />
-              </button>
-              <Input
-                type="search"
-                placeholder="Search electronics, home, beauty, toys & more..."
-                className="h-10 rounded-lg border-primary/15 bg-white pl-10 pr-4 text-sm shadow-none focus-visible:ring-primary/25"
-                value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                  setSearchOpen(true);
-                }}
-                onFocus={() => setSearchOpen(true)}
-              />
-            </div>
-          </form>
+    <Container className="py-3">
+      <div ref={searchRef} className="relative">
+        <form onSubmit={handleSearchSubmit}>
+          <div className="relative">
+            <button
+              type="submit"
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-primary"
+              aria-label="Search products"
+            >
+              <Search className="h-4 w-4" />
+            </button>
+            <Input
+              type="search"
+              placeholder="Search home, travel, kitchen, and more"
+              className="h-11 rounded-sm border-border bg-card pl-10 pr-4 text-sm shadow-none"
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setSearchOpen(true);
+              }}
+              onFocus={() => setSearchOpen(true)}
+              autoFocus
+            />
+          </div>
+        </form>
 
-          {searchOpen && searchQuery.trim().length > 0 && (
-            <div className="absolute left-0 right-0 top-full z-50 mt-1 overflow-hidden rounded-lg border border-border bg-white py-1 shadow-lg">
-              {searchResults.length > 0 ? (
-                <>
-                  {searchResults.map((product) => (
-                    <Link
-                      key={product.id}
-                      href={`/product/${product.slug}`}
-                      className="flex items-center gap-3 px-3 py-2 transition-colors hover:bg-muted"
-                      onClick={() => {
-                        setSearchOpen(false);
-                        setSearchQuery("");
-                      }}
-                    >
-                      <div className="relative h-9 w-9 shrink-0 overflow-hidden rounded-md border border-border">
-                        <Image src={product.images[0]} alt={product.name} fill className="object-cover" sizes="36px" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium">{product.name}</p>
-                        <p className="text-xs text-muted-foreground">{formatPrice(product.salePrice ?? product.price)}</p>
-                      </div>
-                    </Link>
-                  ))}
-                  <button
-                    type="button"
-                    className="w-full border-t border-border px-3 py-2 text-left text-sm font-medium text-primary transition-colors hover:bg-muted"
+        {searchOpen && searchQuery.trim().length > 0 && (
+          <div className="absolute left-0 right-0 top-full z-50 mt-1 overflow-hidden border border-border bg-card py-1 shadow-sm">
+            {searchResults.length > 0 ? (
+              <>
+                {searchResults.map((product) => (
+                  <Link
+                    key={product.id}
+                    href={`/product/${product.slug}`}
+                    className="flex items-center gap-3 px-3 py-2 transition-colors hover:bg-muted"
                     onClick={() => {
-                      router.push(`/shop?search=${encodeURIComponent(searchQuery.trim())}`);
                       setSearchOpen(false);
                       setSearchQuery("");
+                      onNavigate?.();
                     }}
                   >
-                    View all results for &quot;{searchQuery}&quot;
-                  </button>
-                </>
-              ) : (
-                <div className="px-3 py-2.5 text-sm text-muted-foreground">
-                  No products found for &quot;{searchQuery}&quot;.
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      </Container>
-    </div>
+                    <div className="relative h-10 w-10 shrink-0 overflow-hidden bg-muted">
+                      <Image src={product.images[0]} alt={product.name} fill className="object-cover" sizes="40px" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">{product.name}</p>
+                      <p className="text-xs text-muted-foreground">{formatPrice(product.salePrice ?? product.price)}</p>
+                    </div>
+                  </Link>
+                ))}
+                <button
+                  type="button"
+                  className="w-full border-t border-border px-3 py-2.5 text-left text-xs font-medium uppercase tracking-[0.14em] text-primary transition-colors hover:bg-muted"
+                  onClick={() => {
+                    router.push(`/shop?search=${encodeURIComponent(searchQuery.trim())}`);
+                    setSearchOpen(false);
+                    setSearchQuery("");
+                    onNavigate?.();
+                  }}
+                >
+                  View all results for &quot;{searchQuery}&quot;
+                </button>
+              </>
+            ) : (
+              <div className="px-3 py-2.5 text-sm text-muted-foreground">
+                No products found for &quot;{searchQuery}&quot;.
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </Container>
   );
 }
